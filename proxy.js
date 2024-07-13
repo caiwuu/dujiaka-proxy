@@ -1,19 +1,29 @@
-var http = require('http')
-var httpProxy = require('http-proxy')
+var https = require('https');
+var fs = require('fs');
+var httpProxy = require('http-proxy');
 
-var proxy = httpProxy.createProxyServer();
+// 读取证书和私钥
+var options = {
+  key: fs.readFileSync('privkey.pem'),
+  cert: fs.readFileSync('fullchain.pem')
+};
 
-proxy.on('error', function (err, req, res) {
-  res.end();
+var proxy = httpProxy.createProxyServer({
+  target: process.env.proxy_target,
+  secure: false // 如果目标服务器使用自签名证书，需要设置为false
 });
 
-var proxy_server = http.createServer(function (req, res) {
-  delete req.headers.host;
-  proxy.web(req, res, {
-    target: process.env.proxy_target
+proxy.on('error', function (err, req, res) {
+  res.writeHead(500, {
+    'Content-Type': 'text/plain'
   });
+  res.end('Something went wrong.');
+});
+
+var proxy_server = https.createServer(options, function (req, res) {
+  proxy.web(req, res);
 });
 
 proxy_server.listen(8080, function () {
-  console.log('proxy server is running ');
+  console.log('proxy server is running on port 8080');
 });
