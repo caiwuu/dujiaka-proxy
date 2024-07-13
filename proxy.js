@@ -10,7 +10,7 @@ proxy.on('error', function (err, req, res) {
 var proxy_server = http.createServer(function (req, res) {
   delete req.headers.host;
   proxy.web(req, res, {
-    target: 'https://123.60.58.54:80'
+    target: 'https://123.60.58.54'
   });
 });
 
