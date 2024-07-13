@@ -1,0 +1,19 @@
+var http = require('http')
+var httpProxy = require('http-proxy')
+
+var proxy = httpProxy.createProxyServer();
+
+proxy.on('error', function (err, req, res) {
+  res.end();
+});
+
+var proxy_server = http.createServer(function (req, res) {
+  delete req.headers.host;
+  proxy.web(req, res, {
+    target: 'http://123.60.58.54:80'
+  });
+});
+
+proxy_server.listen(8080, function () {
+  console.log('proxy server is running ');
+});
